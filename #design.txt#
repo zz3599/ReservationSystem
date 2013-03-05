@@ -1,0 +1,39 @@
+
+
+Users - Admin, Viewer, User
+      Admin - 
+      	    view all events (but not change)
+	    create users/viewers
+	    create events(time slot for grade)
+	    assign user to event (but not arbitrarily change an already reserved user)
+      Viewer - 
+      	    view all events (but not change)	
+      User - 
+      	   view events/times (NOT NAMES)
+	   reserve their name on an event
+	   be able to change reservation
+Pages - 
+      login - 
+      	    for three different types of users
+      home - 
+      	   right after login - show tab at top -> 
+	   	 admin - create user, create event, assign user to event, view events/reservations
+		 viewer - view events/reservations, 
+      create event - 
+      	     only admin can do this
+      view events
+      	    for viewers/admin list of all events
+	    for user - only see the one they have been assigned
+      reserve event
+      	      for viewers/admin - all reservation events
+	      for users - all time slots but not names of people at the slots, click to reserve/change (only ONE at a time)
+	         see what reservation time is
+EVENT <-> Reservation - ONE TO ZERO/ONE
+Schema: 
+Users: list of all users
+        {id, username(string), password(string), fullname(string), usertype(int)}	
+Reservations - reserved time slots for users 
+	{id, userid (FK references Users.id, USER type), adminid (FK references Users.id, ADMIN type), eventid (FK references Events.id), 
+	timereserved (datetime)}
+Events - grading time slot 
+       {id, adminid (FK references Users.id, ADMIN type), startTime(date), endTime(date), duration(int), location(string), supervisor(TA name)}
