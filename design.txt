@@ -15,6 +15,10 @@ Users - Admin, Viewer, User
 Pages - 
       login - 
       	    for three different types of users
+      home - 
+      	   right after login - show tab at top -> 
+	   	 admin - create user, create event, assign user to event, view events/reservations
+		 viewer - view events/reservations, 
       create event - 
       	     only admin can do this
       view events
