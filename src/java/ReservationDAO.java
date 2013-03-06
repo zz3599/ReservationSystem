@@ -81,7 +81,7 @@ public class ReservationDAO {
         return null;
     }
 
-    private static Reservation extractReservation(ResultSet result) throws Exception{
+    public static Reservation extractReservation(ResultSet result) throws Exception{
         int id = result.getInt("id");
         int userid = result.getInt("userid");
         int adminid = result.getInt("adminid");

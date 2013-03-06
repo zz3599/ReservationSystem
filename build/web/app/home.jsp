@@ -12,27 +12,36 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Home</title>
+        <script src="../js/jquery-1.9.1.min.js"></script>
+        <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
+        <script src="../js/jquery-ui-timepicker-addon.js"></script>
+        <script src="../js/mustache.min.js"></script>
+        <script src="../js/main.js"></script>
+        <link rel="stylesheet" type="text/css" href="../css/main.css">
+        <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>        
         <ul class="menu">
             <li><a href="home.jsp">Home</a></li>
-            <li><a href="news.asp">News</a></li>
-            <li><a href="contact.asp">Contact</a></li>
-            <li><a href="about.asp">About</a></li>
+            <c:choose>
+                <c:when test="${user.usertype == 0}">
+                    <li><a id="manageusers" href="#">Manage Users</a></li>
+                    <li><a id="managevents" href="#">Manage Events</a></li>
+                    <li><a id="viewusers" href="#">View Users</a></li>
+                    <li><a id="viewevents" href="#">View Events</a></li>
+                    <li><a id="assignreserve" href="#">Assign Reservation</a></li>
+                </c:when>
+                <c:when test="${user.usertype == 1}">
+                    <li><a id="viewevents" href="#">View Events</a></li>
+                </c:when>
+                <c:otherwise>
+                    <li><a id="viewevents" href="#">View Events</a></li>
+                    <li><a id="makereserve" href="#">Make Reservation</a></li>
+                </c:otherwise>
+            </c:choose>
         </ul>
-        
-        <h2>Hello ${user.fullname}</h2>
-    <c:choose>
-  <c:when test="${user.usertype == 0}">
-      <p>admin</p>
-  </c:when>
-  <c:when test="${user.usertype == 1}">
-      <p>viewer</p>
-  </c:when>
-  <c:otherwise>
-    <p>user</p>
-  </c:otherwise>
-</c:choose>
 
-</body>
+        <h2>Hello ${user.fullname}!</h2>
+        <div id="content"></div>
+    </body>
 </html>

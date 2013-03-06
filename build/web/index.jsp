@@ -11,37 +11,14 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="jquery-1.9.1.min.js"></script>
         <title>Login</title>
     </head>
     <body>
         <form name="form" id="loginForm" action="LoginServlet" method="post">
-            Username: <input type="text" size="20" name="username"> <br>
-            Password: <input type="password" size="20" name="password"> <br>
+            Username: <input type="text"  name="username"> <br>
+            Password: <input type="password" name="password"> <br>
             <input type="submit">            
         </form>
         <div><c:out value="${requestScope.errorMessage}"/></div>
-    </body>
-    <script>
-        $(document).ready(function(){
-           $('#submit').click(function(){
-              $.ajax({
-                  type: "POST",
-                  url: "LoginServlet",
-                  data: $('#loginForm').serialize(),
-                  success: function(result){    
-                      alert(result);
-                      if(result === 'true'){
-                          //redirect to the main page
-                          $('#errors').text('');
-                          window.location = "./app/home.jsp";
-                      } else {                          
-                          $('#errors').text('Invalid credentials');
-                      }
-                  }
-              }); 
-           });
-        });
-        
-    </script>
+    </body>    
 </html>

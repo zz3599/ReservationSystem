@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventDAO {
-    private static final String CREATEEVENT = "Insert into Events(adminid, startTime, endTime, duration, location, supervisor)"
+    private static final String CREATEEVENT = "Insert into Events(adminid, startTime, endTime, duration, location, supervisor) "
             + "values(?, ?, ?, ?, ?, ?)";
     private static final String SELECTALLEVENTS = "Select * from Events";
     
@@ -44,21 +44,25 @@ public class EventDAO {
                 events.add(extractEvent(result));
             }
             return events;            
-        } catch(Exception ex){ }
+        } catch(Exception ex){ 
+            ex.printStackTrace();
+        }
         return null;
     }
     
-    public static Event extractEvent(ResultSet result) throws Exception{
+    
+    private static Event extractEvent(ResultSet result) throws Exception{
         int id = result.getInt("id");
         int userid = result.getInt("adminid");
-        Timestamp startTime = result.getTimestamp("starTime");
+        Timestamp startTime = result.getTimestamp("startTime");
         Timestamp endTime = result.getTimestamp("endTime");
         int duration = result.getInt("duration");
         String location = result.getString("location");
         String supervisor = result.getString("supervisor");
-        Event res = new Event(id, userid, startTime, endTime, duration, location, supervisor);
-        return res;
-        
+        //UserDAO.User user = UserDAO.extractUser(result);
+        //ReservationDAO.Reservation res = ReservationDAO.extractReservation(result);
+        Event event = new Event(id, userid, startTime, endTime, duration, location, supervisor);
+        return event;        
     }
     public static class Event {
         public int id;
@@ -68,7 +72,15 @@ public class EventDAO {
         public int duration;
         public String location;
         public String supervisor;
-        
+        public UserDAO.User user;
+        public ReservationDAO.Reservation reservation; 
+
+        public Event(int id, int adminid, Timestamp startTime, Timestamp endTime, int duration, String location, String supervisor,
+                UserDAO.User user, ReservationDAO.Reservation reservation){
+            this(id, adminid, startTime, endTime, duration, location, supervisor);
+            this.user = user;
+            this.reservation = reservation;
+        }
         public Event(int id, int adminid, Timestamp startTime, Timestamp endTime, int duration, String location, String supervisor) {
             this.id = id;
             this.adminid = adminid;
@@ -76,7 +88,7 @@ public class EventDAO {
             this.endTime = endTime;
             this.duration = duration;
             this.location = location;
-            this.supervisor = supervisor;
+            this.supervisor = supervisor;            
         }
         
         public int getAdminID(){
@@ -115,6 +127,13 @@ public class EventDAO {
             return supervisor;
         }
         
+        public UserDAO.User getUser() {
+            return user;
+        }
+
+        public ReservationDAO.Reservation getReservation() {
+            return reservation;
+        }
         
     }
     

@@ -8,6 +8,8 @@
  */
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 public class UserDAO {
     public static final int ADMIN = 0;
     public static final int VIEWER = 1;
@@ -15,7 +17,9 @@ public class UserDAO {
     
     private static final String CHECKUSER = "Select * from Users where username=? and password=?";
     private static final String CREATEUSER = "Insert into Users (username, password, fullname, usertype) values (?, ?, ?, ?)";
-    
+    private static final String FINDUSER = "Select * from Users where username like ? or fullname like ?";
+    private static final String GETALLUSERS = "Select * from Users";
+    private static final String DELETEUSER = "Delete from Users where id=?"; //TODO: implement
     
     public static User existsUser(String username, String password){
         if(Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(password)){
@@ -57,8 +61,62 @@ public class UserDAO {
             if(res.next()){
                 return new User(res.getInt(1), username, password, fullname, usertype);
             }            
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public static List<User> FindUsers(String query){
+        if(Utils.isNullOrEmpty(query))
+            return  null;
+        try {
+            Connection con = DB.getConnection();
+            PreparedStatement s = con.prepareStatement(FINDUSER);
+            s.setString(1, "%" + query + "%");
+            s.setString(2, "%" + query + "%");
+            ResultSet res = s.executeQuery();
+            List<User> users = new ArrayList<User>(); 
+            while(res.next()){
+                users.add(extractUser(res));
+            }        
+            return users;
         } catch(Exception e){ }
         return null;
+    }
+    public static List<User> selectAllusers(){
+        try {
+            Connection con = DB.getConnection();
+            PreparedStatement s = con.prepareStatement(GETALLUSERS);
+            ResultSet res = s.executeQuery();
+            List<User> users = new ArrayList<User>(); 
+            while(res.next()){
+                users.add(extractUser(res));
+            }        
+            return users;
+        } catch(Exception e){ }
+        return null;
+    }
+    
+    public static boolean removeUser(int userid){
+        try {
+            Connection con = DB.getConnection();
+            PreparedStatement s = con.prepareStatement(DELETEUSER);
+            s.setInt(1, userid);
+            int res = s.executeUpdate();
+            if(res == 1)
+                return true;
+        } catch(Exception e){ }
+        return false;
+    }
+    
+    public static User extractUser(ResultSet result) throws Exception{
+        int id = result.getInt("id");
+        String username = result.getString("username");
+        String password = result.getString("password");
+        String fullname = result.getString("fullname");
+        int usertype = result.getInt("usertype");
+        return new User(id, username, password, fullname, usertype);
     }
     
     public static class User{
@@ -97,6 +155,7 @@ public class UserDAO {
         public int getUsertype() {
             return usertype;
         }
+        
         
     }
 }
