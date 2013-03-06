@@ -13,7 +13,7 @@ import java.util.List;
 public class EventDAO {
     private static final String CREATEEVENT = "Insert into Events(adminid, startTime, endTime, duration, location, supervisor) "
             + "values(?, ?, ?, ?, ?, ?)";
-    private static final String SELECTALLEVENTS = "Select * from Events";
+    private static final String SELECTALLEVENTS = "Select * from Events order by startTime";
     
     public static Event createEvent(int adminid, Timestamp s, Timestamp e, int duration, String location, String supervisor){ 
         try {
