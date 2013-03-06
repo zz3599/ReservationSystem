@@ -22,15 +22,15 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
-        <url-pattern>/users.jsp</url-pattern>
+        <url-pattern>/app/users</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>EventServlet</servlet-name>
-        <url-pattern>/events.jsp</url-pattern>
+        <url-pattern>/app/events</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ReserveServlet</servlet-name>
-        <url-pattern>/ReserveServlet</url-pattern>
+        <url-pattern>/app/reserve</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

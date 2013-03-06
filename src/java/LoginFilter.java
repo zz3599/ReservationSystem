@@ -39,7 +39,12 @@ public class LoginFilter implements Filter {
         HttpSession session = request.getSession(false);
 
         if (session == null || session.getAttribute("user") == null) {
-            response.sendRedirect(request.getContextPath() + "/index.jsp"); // No logged-in user found, so redirect to login page.
+            String requesturl = request.getRequestURI();
+            if (requesturl.endsWith("index.jsp")) {
+                chain.doFilter(req, res);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/index.jsp"); // No logged-in user found, so redirect to login page.
+            }
         } else {
             if (session.getAttribute("usertype") == null) {
                 UserDAO.User currentUser = (UserDAO.User) session.getAttribute("user");

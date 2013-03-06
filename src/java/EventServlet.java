@@ -32,14 +32,22 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int usertype = (Integer) request.getSession().getAttribute("usertype");
-        if (usertype != UserDAO.ADMIN) {
-            request.getRequestDispatcher("/app/home.jsp").forward(request, response);
-        } else {
+        String action = request.getParameter("action");
+        if (Utils.isNullOrEmpty(action)) {
+            int usertype = (Integer) request.getSession().getAttribute("usertype");
             List<EventDAO.Event> events = EventDAO.selectAllEvents();
             request.setAttribute("events", events);
             request.getRequestDispatcher("/app/events.jsp").forward(request, response);
+        } else {
+            if(action.equals("allevents")){
+                PrintWriter out = response.getWriter();
+                String json = Utils.toJSON(EventDAO.selectAllEvents());
+                out.write(json);
+                out.flush();
+                out.close();
+            }
         }
+
     }
 
     /**

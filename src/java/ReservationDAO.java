@@ -15,7 +15,7 @@ public class ReservationDAO {
     private static final String CREATERESERVATION = "Insert into Reservations(userid, adminid, eventid, timereserved"
             + " values(?, ?, ?, ?)";
     private static final String REMOVERESERVATION = "Delete from Reservations where userid=?";
-    private static final String GETALL = "Select * from Reservations";
+    private static final String GETALL = "Select * from Reservations R, users U where R.userid = U.id";
     private static final String GETUSERRESERVATION = "Select * from Reservations where user userid=?";
 
     public static Reservation createReservation(int userid, int adminid, int eventid, Timestamp timereserved) {
@@ -59,7 +59,9 @@ public class ReservationDAO {
             ResultSet result = ps.executeQuery();
             List<Reservation> reserves = new ArrayList<Reservation>();
             while (result.next()) {
-                reserves.add(extractReservation(result));
+                Reservation res = extractReservation(result);
+                res.user = extractUser(result);
+                reserves.add(res);
             }
             return reserves;
         } catch (Exception e) {
@@ -91,14 +93,24 @@ public class ReservationDAO {
         return res;
     }
 
-    public static class Reservation {
+    //different from UserDAO because we joined, so different column name of id
+    private static UserDAO.User extractUser(ResultSet set) throws Exception{
+        int userid = set.getInt("userid");
+        String fullname = set.getString("fullname");
+        String username = set.getString("username");
+        String password = set.getString("password");
+        int usertype = set.getInt("usertype");
+        return  new UserDAO.User(userid, username, password, fullname, usertype);
+    }
+    public static class Reservation {      
 
         public int id;
         public int userid;
         public int adminid;
         public int eventid;
         public Timestamp timereserved;
-
+        public UserDAO.User user;
+        
         public int getId() {
             return id;
         }
@@ -119,6 +131,13 @@ public class ReservationDAO {
             return timereserved;
         }
 
+        public UserDAO.User getUser() {
+            return user;
+        }
+        public Reservation(int id, int userid, int adminid, int eventid, Timestamp timereserved, UserDAO.User user){
+            this(id, userid, adminid, eventid, timereserved);
+            this.user = user;
+        }
         public Reservation(int id, int userid, int adminid, int eventid, Timestamp timereserved) {
             this.id = id;
             this.userid = userid;

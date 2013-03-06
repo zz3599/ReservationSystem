@@ -12,13 +12,13 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Manage Users</title>
-        <script src="js/jquery-1.9.1.min.js"></script>
-        <script src="js/jquery-ui-1.9.2.custom.min.js"></script>
-        <script src="js/jquery-ui-timepicker-addon.js"></script>
-        <script src="js/mustache.min.js"></script>
-        <script src="js/main.js"></script>
-        <link rel="stylesheet" type="text/css" href="css/main.css">
-        <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.9.2.custom.min.css">
+        <script src="../js/jquery-1.9.1.min.js"></script>
+        <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
+        <script src="../js/jquery-ui-timepicker-addon.js"></script>
+        <script src="../js/mustache.min.js"></script>
+        <script src="../js/main.js"></script>
+        <link rel="stylesheet" type="text/css" href="../css/main.css">
+        <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>
         <h1>Manage Users</h1>
@@ -49,7 +49,7 @@
                 var template = "<div id={{id}}> {{fullname}}, handle: {{username}}</div>";
                 $.ajax({
                     type: "POST",
-                    url: "users.jsp",
+                    url: "users",
                     data: $('#adduserform').serialize(),
                     success: function(data) {
                         try {
