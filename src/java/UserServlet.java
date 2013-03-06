@@ -17,38 +17,8 @@ import org.json.simple.*;
  * @author brook
  */
 public class UserServlet extends HttpServlet {
-
-    /**
-     * Processes requests for both HTTP
-     * <code>GET</code> and
-     * <code>POST</code> methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet UserServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet UserServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {
-            out.close();
-        }
-    }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+
     /**
      * Handles the HTTP
      * <code>GET</code> method.
@@ -61,13 +31,14 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        List<UserDAO.User> users = UserDAO.selectAllusers();
-        String json = Utils.toJSON(users);
-        out.print(json);
-        out.flush();
-        out.close();
+        int usertype = (Integer) request.getSession().getAttribute("usertype");
+        if (usertype != UserDAO.ADMIN) {
+            request.getRequestDispatcher("/app/home.jsp").forward(request, response);
+        } else {
+            List<UserDAO.User> users = UserDAO.selectAllusers();
+            request.setAttribute("users", users);
+            request.getRequestDispatcher("/app/users.jsp").forward(request, response);
+        }
     }
 
     /**
@@ -93,8 +64,9 @@ public class UserServlet extends HttpServlet {
             String password = request.getParameter("password").trim();
             String fullname = request.getParameter("fullname").trim();
             int usertype = Integer.parseInt(request.getParameter("usertype"));
-            if (UserDAO.createUser(username, password, fullname, usertype) != null) {
-                out.write("success");
+            UserDAO.User user = null;
+            if ((user=UserDAO.createUser(username, password, fullname, usertype)) != null) {
+                out.write(Utils.toJSON(user));
             } else {
                 out.write("fail");
             }
@@ -104,7 +76,7 @@ public class UserServlet extends HttpServlet {
             if (!Utils.isNullOrEmpty(useridstring)) {
                 int id = Integer.parseInt(useridstring);
                 UserDAO.User user = (UserDAO.User) request.getSession().getAttribute("user");
-                if(user != null && user.id == id){
+                if (user != null && user.id == id) {
                     out.write("sameuser");
                 } else if (UserDAO.removeUser(id)) {
                     out.write("success");

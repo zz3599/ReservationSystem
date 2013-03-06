@@ -135,6 +135,10 @@ public class UserDAO {
         public boolean isValid(){
             return this.id != 0 && !Utils.isNullOrEmpty(username) && !Utils.isNullOrEmpty(password);
         }
+        
+        public boolean isAdmin(){
+            return this.usertype == UserDAO.ADMIN;
+        }
 
         public int getId() {
             return id;

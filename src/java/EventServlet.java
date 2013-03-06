@@ -19,36 +19,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class EventServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP
-     * <code>GET</code> and
-     * <code>POST</code> methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        PrintWriter out = response.getWriter();
-        try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet EventServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet EventServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        } finally {
-            out.close();
-        }
-    }
-
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP
@@ -62,13 +32,14 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("application/json");
-        PrintWriter out = response.getWriter();
-        List<EventDAO.Event> events = EventDAO.selectAllEvents();
-        String json = Utils.toJSON(events);        
-        out.print(json);
-        out.flush();
-        out.close();
+        int usertype = (Integer) request.getSession().getAttribute("usertype");
+        if (usertype != UserDAO.ADMIN) {
+            request.getRequestDispatcher("/app/home.jsp").forward(request, response);
+        } else {
+            List<EventDAO.Event> events = EventDAO.selectAllEvents();
+            request.setAttribute("events", events);
+            request.getRequestDispatcher("/app/events.jsp").forward(request, response);
+        }
     }
 
     /**
@@ -83,24 +54,24 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action").trim().toLowerCase();
+        String action = request.getParameter("action");
         if (Utils.isNullOrEmpty(action)) {
             return;
         }
         PrintWriter out = response.getWriter();
         if (action.equals("addevent")) {
-            response.setContentType("application/json");
             UserDAO.User user = (UserDAO.User) request.getSession().getAttribute("user");
-            if(user == null || !user.isValid())
+            if (user == null || !user.isValid() || !user.isAdmin()) {
                 return;
+            }
             int adminid = user.getId();
             String location = request.getParameter("location").trim();
             String supervisor = request.getParameter("supervisor").trim();
             Timestamp startTime = Timestamp.valueOf(request.getParameter("startTime"));
             Timestamp endTime = Timestamp.valueOf(request.getParameter("endTime"));
-            int duration = (int)TimeUnit.MILLISECONDS.toMinutes(endTime.getTime()-startTime.getTime());
+            int duration = (int) TimeUnit.MILLISECONDS.toMinutes(endTime.getTime() - startTime.getTime());
             EventDAO.Event event = EventDAO.createEvent(adminid, startTime, endTime, duration, location, supervisor);
-            if(event != null){
+            if (event != null) {
                 out.write(Utils.toJSON(event));
             }
         } else if (action.equals("removeevent")) { //TODO: Implement

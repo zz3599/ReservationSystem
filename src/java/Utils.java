@@ -25,4 +25,9 @@ public class Utils {
         Gson gson = new Gson();
         return gson.toJson(something);
     }
+    
+    public static <T> JsonElement toJSONElement(T something){
+        Gson gson = new Gson();
+        return gson.toJsonTree(something);
+    }
 }

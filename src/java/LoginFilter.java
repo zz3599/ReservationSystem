@@ -41,6 +41,10 @@ public class LoginFilter implements Filter {
         if (session == null || session.getAttribute("user") == null) {
             response.sendRedirect(request.getContextPath() + "/index.jsp"); // No logged-in user found, so redirect to login page.
         } else {
+            if (session.getAttribute("usertype") == null) {
+                UserDAO.User currentUser = (UserDAO.User) session.getAttribute("user");
+                session.setAttribute("usertype", currentUser.usertype);
+            }
             chain.doFilter(req, res); // Logged-in user found, so just continue request.
         }
     }
@@ -50,5 +54,4 @@ public class LoginFilter implements Filter {
         // If you have assigned any expensive resources as field of
         // this Filter class, then you could clean/close them here.
     }
-
 }

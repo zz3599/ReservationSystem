@@ -22,11 +22,11 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>UserServlet</servlet-name>
-        <url-pattern>/UserServlet</url-pattern>
+        <url-pattern>/users.jsp</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>EventServlet</servlet-name>
-        <url-pattern>/EventServlet</url-pattern>
+        <url-pattern>/events.jsp</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ReserveServlet</servlet-name>

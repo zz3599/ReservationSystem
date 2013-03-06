@@ -21,15 +21,14 @@
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>        
-        <ul class="menu">
+        <ul id="mainmenu"class="menu">
             <li><a href="home.jsp">Home</a></li>
             <c:choose>
                 <c:when test="${user.usertype == 0}">
-                    <li><a id="manageusers" href="#">Manage Users</a></li>
-                    <li><a id="managevents" href="#">Manage Events</a></li>
-                    <li><a id="viewusers" href="#">View Users</a></li>
-                    <li><a id="viewevents" href="#">View Events</a></li>
-                    <li><a id="assignreserve" href="#">Assign Reservation</a></li>
+                    <li><a id="manageusers" href="../users.jsp">Manage Users</a></li>
+                    <li><a id="viewevents" href="../events.jsp">View Events</a></li>
+                    <li><a id="addevent" href="#">Create Event</a></li>
+                    <li><a id="assignuser" href="#">Assign User To Event</a></li>
                 </c:when>
                 <c:when test="${user.usertype == 1}">
                     <li><a id="viewevents" href="#">View Events</a></li>
@@ -40,8 +39,15 @@
                 </c:otherwise>
             </c:choose>
         </ul>
-
         <h2>Hello ${user.fullname}!</h2>
         <div id="content"></div>
+        <script>
+            $(document).ready(function(){
+               $('#mainmenu').delegate("a", "click", function(e){
+                   var id = $(this).attr('id');
+               }) ;
+            });
+            
+        </script>
     </body>
 </html>
