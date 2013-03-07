@@ -32,7 +32,7 @@ EVENT <-> Reservation - ONE TO ZERO/ONE
 Schema: 
 Users: list of all users
         {id, username(string), password(string), fullname(string), usertype(int)}	
-Reservations - reserved time slots for users 
+Reservaitons - reserved time slots for users 
 	{id, userid (FK references Users.id, USER type), adminid (FK references Users.id, ADMIN type), eventid (FK references Events.id), 
 	timereserved (datetime)}
 Events - grading time slot 

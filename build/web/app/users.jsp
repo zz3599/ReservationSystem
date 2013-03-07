@@ -16,7 +16,6 @@
         <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
         <script src="../js/jquery-ui-timepicker-addon.js"></script>
         <script src="../js/mustache.min.js"></script>
-        <script src="../js/main.js"></script>
         <link rel="stylesheet" type="text/css" href="../css/main.css">
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>

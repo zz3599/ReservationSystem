@@ -12,13 +12,13 @@ import java.util.List;
 
 public class ReservationDAO {
 
-    private static final String CREATERESERVATION = "Insert into Reservations(userid, adminid, eventid, timereserved"
+    private static final String CREATERESERVATION = "Insert into Reservations(userid, adminid, eventid, timereserved)"
             + " values(?, ?, ?, ?)";
     private static final String REMOVERESERVATION = "Delete from Reservations where userid=?";
-    private static final String GETALL = "Select * from Reservations R, users U where R.userid = U.id";
-    private static final String GETUSERRESERVATION = "Select * from Reservations where user userid=?";
+    private static final String GETALL = "Select * from Reservations R, Users U where R.userid = U.id";
+    private static final String GETUSERRESERVATION = "Select * from Reservations where userid=?";
 
-    public static Reservation createReservation(int userid, int adminid, int eventid, Timestamp timereserved) {
+    public static Reservation createReservation(int userid, Integer adminid, int eventid, Timestamp timereserved) {
         try {
             Connection con = DB.getConnection();
             PreparedStatement ps = con.prepareStatement(CREATERESERVATION, Statement.RETURN_GENERATED_KEYS);
@@ -65,6 +65,7 @@ public class ReservationDAO {
             }
             return reserves;
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return null;
     }
