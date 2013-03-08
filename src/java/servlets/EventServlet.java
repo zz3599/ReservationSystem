@@ -1,24 +1,29 @@
+package servlets;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
+import db.EventDAO;
+import db.UserDAO;
+import utils.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.simple.*;
 
 /**
  *
  * @author brook
  */
-public class UserServlet extends HttpServlet {
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+public class EventServlet extends HttpServlet {
 
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP
      * <code>GET</code> method.
@@ -31,14 +36,7 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int usertype = (Integer) request.getSession().getAttribute("usertype");
-        if (usertype != UserDAO.ADMIN) {
-            request.getRequestDispatcher("/app/home.jsp").forward(request, response);
-        } else {
-            List<UserDAO.User> users = UserDAO.selectAllusers();
-            request.setAttribute("users", users);
-            request.getRequestDispatcher("/app/users.jsp").forward(request, response);
-        }
+        getAllEvents(request, response);
     }
 
     /**
@@ -53,24 +51,29 @@ public class UserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action").trim().toLowerCase();
+        String action = request.getParameter("action");
         if (Utils.isNullOrEmpty(action)) {
             return;
         }
         PrintWriter out = response.getWriter();
-        if (action.equals("adduser")) {
-            response.setContentType("text/plain");
-            String username = request.getParameter("username").trim();
-            String password = request.getParameter("password").trim();
-            String fullname = request.getParameter("fullname").trim();
-            int usertype = Integer.parseInt(request.getParameter("usertype"));
-            UserDAO.User user = null;
-            if ((user=UserDAO.createUser(username, password, fullname, usertype)) != null) {
-                out.write(Utils.toJSON(user));
-            } else {
-                out.write("fail");
+        if (action.equals("addevent")) {
+            UserDAO.User user = (UserDAO.User) request.getSession().getAttribute("user");
+            if (user == null || !user.isValid() || !user.isAdmin()) {
+                return;
             }
-        } else if (action.equals("removeuser")) {
+            Timestamp startTime = Timestamp.valueOf(request.getParameter("startTime"));
+            Timestamp endTime = Timestamp.valueOf(request.getParameter("endTime"));
+            int duration = Integer.parseInt(request.getParameter("duration"));
+            int totalTime = (int) TimeUnit.MILLISECONDS.toMinutes(endTime.getTime() - startTime.getTime());
+            int numslots = totalTime / duration;
+            String location = request.getParameter("location").trim();
+            String supervisor = request.getParameter("supervisor").trim();
+            String title = request.getParameter("title").trim();
+            EventDAO.Event event = EventDAO.createEvent(startTime, endTime, duration, numslots, location, supervisor, title);
+            if (event != null) {
+                out.write(Utils.toJSON(event));
+            }
+        } else if (action.equals("removeevent")) { //TODO: Implement
             response.setContentType("text/plain");
             String useridstring = request.getParameter("id");
             if (!Utils.isNullOrEmpty(useridstring)) {
@@ -83,13 +86,8 @@ public class UserServlet extends HttpServlet {
                 } else {
                     out.write("fail");
                 }
-            }
-        } else if (action.equals("finduser")) {
-            response.setContentType("application/json");
-            String query = request.getParameter("query");
-            if (!Utils.isNullOrEmpty(query)) {
-                List<UserDAO.User> matchingusers = UserDAO.FindUsers(query);
-                out.write(Utils.toJSON(matchingusers));
+            } else {
+                out.write("fail");
             }
         } else {
             response.setContentType("text/plain");
@@ -97,6 +95,22 @@ public class UserServlet extends HttpServlet {
         }
         out.flush();
         out.close();
+    }
+
+    public void getAllEvents(HttpServletRequest request, HttpServletResponse response) {
+        UserDAO.User user = (UserDAO.User) request.getSession().getAttribute("user");
+        int usertype = (Integer) request.getSession().getAttribute("usertype");
+        List<EventDAO.Event> events = null;
+        if (usertype == UserDAO.USER) {
+            events = EventDAO.selectUserEvents(user.id);
+        } else {
+            events = EventDAO.selectAllEvents();
+        }
+        request.setAttribute("events", events);
+        try {
+            request.getRequestDispatcher("/app/events.jsp").forward(request, response);
+        } catch (Exception e) {
+        }
     }
 
     /**

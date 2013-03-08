@@ -1,3 +1,5 @@
+package db;
+
 /*
  * Event Database Manager
  */
@@ -15,7 +17,7 @@ public class EventDAO {
             + "values(?, ?, ?, ?, ?, ?, ?)";
     private static final String SELECTALLEVENTS = "Select * from Events order by startTime";
     private static final String SELECTUSEREVENTS = "Select * from Events E, EventAssignments A "
-            + "where E.id = A.eventid and A.userid = ?";
+            + "where E.id = A.eventid and A.userid = ? order by startTime";
     private static final String GETEVENT = "Select * from Events where id=?";
     
     public static Event createEvent(Timestamp s, Timestamp e, int duration, int numslots, String location, String supervisor, String title){ 

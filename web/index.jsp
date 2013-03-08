@@ -11,14 +11,16 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" type="text/css" href="css/main.css">
+        <link rel="stylesheet" type="text/css" href="css/jquery-ui-1.9.2.custom.min.css">
         <title>Login</title>
     </head>
     <body>
-        <form name="form" id="loginForm" action="LoginServlet" method="post">
+        <form name="form" class="loginform" id="loginForm" action="LoginServlet" method="post">
             Username: <input type="text"  name="username"> <br>
             Password: <input type="password" name="password"> <br>
-            <input type="submit" value="Login">            
+            <input class="loginbutton" type="submit" value="Login">
+            <div><c:out value="${requestScope.errorMessage}"/></div>
         </form>
-        <div><c:out value="${requestScope.errorMessage}"/></div>
     </body>    
 </html>

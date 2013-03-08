@@ -1,3 +1,5 @@
+package utils;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -8,8 +10,8 @@
  * @author brook
  */
 import java.util.List;
-import org.json.simple.*;
 import com.google.gson.*;
+
 public class Utils {
     public static boolean isNullOrEmpty(String s){
         return s == null || s.length() == 0;

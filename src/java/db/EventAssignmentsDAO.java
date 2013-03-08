@@ -1,3 +1,5 @@
+package db;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -29,7 +31,8 @@ public class EventAssignmentsDAO {
             if(res.next()){
                 return new EventAssignment(res.getInt(1), eventid, userid, adminid, timestamp, 0);
             }            
-        } catch(Exception ex){ }
+        } catch(Exception ex){ 
+        ex.printStackTrace();}
         return null;
     }   
     

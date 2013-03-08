@@ -1,8 +1,14 @@
+package servlets;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 
+import db.EventDAO;
+import db.ReservationDAO;
+import db.UserDAO;
+import utils.Utils;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Timestamp;
@@ -39,6 +45,7 @@ public class ReserveServlet extends HttpServlet {
             throws ServletException, IOException {
         String eventid = request.getParameter("eventid");
         HttpSession session = request.getSession();
+        session.setAttribute("yourslot", null);//null it out each time
         if (!Utils.isNullOrEmpty(eventid)) {
             int id = Integer.parseInt(eventid);
             EventDAO.Event event = EventDAO.selectEvent(id);

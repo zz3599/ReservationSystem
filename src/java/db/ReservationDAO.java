@@ -1,3 +1,5 @@
+package db;
+
 /*
  * Reservations Database Manager
  */

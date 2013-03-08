@@ -1,22 +1,25 @@
+package servlets;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 
+import db.UserDAO;
+import utils.Utils;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Timestamp;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author brook
  */
-public class AssignServlet extends HttpServlet {
+public class LoginServlet extends HttpServlet {
+
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
@@ -31,19 +34,7 @@ public class AssignServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        UserDAO.User user = (UserDAO.User) request.getSession().getAttribute("user");
-        int usertype = (Integer) request.getSession().getAttribute("usertype");
-        List<EventDAO.Event> events = null;
-        if (usertype != UserDAO.ADMIN) {
-            response.sendRedirect("../index.jsp");
-            return;
-        }
-        events = EventDAO.selectAllEvents();
-        request.setAttribute("events", events);
-        try {
-            request.getRequestDispatcher("/app/assign.jsp").forward(request, response);
-        } catch (Exception e) {
-        }
+        
     }
 
     /**
@@ -58,25 +49,23 @@ public class AssignServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (Utils.isNullOrEmpty(action)) {
+        String username = request.getParameter("username").trim();
+        String password = request.getParameter("password").trim();
+        if (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(password)) {
+            request.setAttribute("errorMessage", "Invalid username/password");
+            request.getRequestDispatcher("index.jsp").forward(request, response);
             return;
         }
-        PrintWriter out = response.getWriter();
-        if (action.equals("assignuser")) {
-            //admin is assigning a user
-            int eventid = Integer.parseInt(request.getParameter("eventid"));
-            int userid = Integer.parseInt(request.getParameter("userid"));
-            int adminid = ((UserDAO.User) request.getSession().getAttribute("user")).id;
-            java.util.Date date = new java.util.Date();
-            Timestamp timereserved = new Timestamp(date.getTime());
-            EventAssignmentsDAO.EventAssignment assignment = EventAssignmentsDAO.assignUser(eventid, userid, adminid, timereserved);
-            if (assignment != null) {
-                out.write("sucess");
-            } else {
-                out.write("fail");
-            }
-        }
+        UserDAO.User user = UserDAO.existsUser(username, password);
+        if (user != null && user.isValid()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+            session.setAttribute("usertype", user.usertype);
+            response.sendRedirect("app/home.jsp");
+        } else {
+            request.setAttribute("errorMessage", "Invalid username/password");
+            request.getRequestDispatcher("index.jsp").forward(request, response);
+        }        
     }
 
     /**

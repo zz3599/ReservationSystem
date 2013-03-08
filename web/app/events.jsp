@@ -20,33 +20,59 @@
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>
-        <h1>Event Listing</h1>
-        <div id="listevents">
+        <div class="horizontal">
+            <ul id="mainmenu"class="menu">
+                <li><a href="home.jsp">Home</a></li>
+                <li><a href="logout">Logout</a></li>
+                    <c:choose>
+                        <c:when test="${user.usertype == 0}">
+                        <li><a id="manageusers" href="users">Manage Users</a></li>
+                        <li><a id="viewevents" href="events">View/Create Events</a></li>
+                        <li><a id="assignuser" href="assign">Assign User To Event</a></li>
+                        </c:when>
+                        <c:when test="${user.usertype == 1}">
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:when>
+                        <c:otherwise>
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:otherwise>
+                    </c:choose>
+            </ul>
+        </div>
+        <h2>Event Listing</h2>
+        <c:if test="${empty events && usertype == 2}">
+            You were assigned to no events
+        </c:if>
+        <div class="list" id="listevents">
             <c:forEach items="${events}" var="e">
-                <div class="" id="${e.id}">
-                    Event: ${e.title} <br>
-                    Location: ${e.location}  <br>
+                <h3>Event: ${e.title}</h3>
+                <div class="" id="${e.id}">                    
+                    Location: ${e.location}<br>
                     TA: ${e.supervisor} <br>
                     Starts: ${e.startTime} <br>
                     Ends: ${e.endTime} <br>
-                    <a href="reserve?eventid=${e.id}">Reserve</a>
+                    <c:if test="${user.usertype == 2}">
+                        <a href="reserve?eventid=${e.id}">Reserve Slot</a>
+                    </c:if>
+                    <c:if test="${user.usertype != 2}">
+                        <a href="reserve?eventid=${e.id}">See Reservations</a>
+                    </c:if>
                 </div>  
-                <br>
             </c:forEach>
-            
+
         </div>
         <c:if test="${user.usertype == 0}">
-            <div id="addevent">
-                <p>Add Event<p>
-                <form id="addeventform" name="addevent">
+            <div id="addevent">                
+                <form class="loginform" id="addeventform" name="addevent">
+                    <h3>Add Event</h3>
                     Title(something descriptive) <input id="title" type="text" name="title"/><br>
                     Location: <input id="location" type="text" name="location"/><br>
                     Supervisor: <input type="text" id="supervisor" name="supervisor"/><br>
                     Start: <input type="text" id="startTime" name="startTime" value="" class=""/><br>
                     End: <input type="text" id="endTime" name="endTime" value="" class=""/><br>
-                    Slot Duration (minutes)<input type="text" id="duration" name="duration" value=""/><br>
+                    Slot Duration <input type="text" id="duration" name="duration" value=""/><br>
                     <input type="hidden" name="action" value="addevent"><br>
-                    <br><input id="addeventsubmit" type="submit">
+                    <br><input class="loginbutton" id="addeventsubmit" type="submit">
                 </form>
             </div>
             <div id="errors"></div>
@@ -61,7 +87,7 @@
 
             startDateTextBox.datetimepicker({
                 dateFormat: "yy-mm-dd",
-                timeFormat: "hh:mm:ss",
+                timeFormat: "H:mm:ss",
                 onClose: function(dateText, inst) {
                     if (endDateTextBox.val() !== '') {
                         var testStartDate = startDateTextBox.datetimepicker('getDate');
@@ -79,7 +105,7 @@
             });
             endDateTextBox.datetimepicker({
                 dateFormat: "yy-mm-dd",
-                timeFormat: "hh:mm:ss",
+                timeFormat: "H:mm:ss",
                 onClose: function(dateText, inst) {
                     if (startDateTextBox.val() !== '') {
                         var testStartDate = startDateTextBox.datetimepicker('getDate');
@@ -99,8 +125,8 @@
                 e.preventDefault();
                 var location, supervisor, stime, etime, title, duration;
                 var parent = $('#listevents');
-                var template = '<br><div id={{id}}> Event: {{title}} <br> Location: {{location}}  <br>' + 
-                    'TA: {{supervisor}}<br>Starts: {{startTime} <br>Ends: {{endTime}}</div>';
+                var template = '<br><div id={{id}}> Event: {{title}} <br> Location: {{location}}  <br>' +
+                        'TA: {{supervisor}}<br>Starts: {{startTime}} <br>Ends: {{endTime}}</div>';
                 if (!(location = $('#location').val()) || !(supervisor = $('#supervisor').val()) ||
                         !(stime = $('#startTime').val()) || !(etime = $('#endTime').val()) ||
                         !(title = $('#title').val()) || !(duration = $('#duration').val())) {
@@ -116,7 +142,6 @@
                             try {
                                 var datao = JSON.parse(data);
                                 var newevent = $(Mustache.render(template, datao)).appendTo(parent);
-                                var newlink = $("<a>", {href: 'reserve?id=' + datao.id}).appendTo(newevent);
                                 $('#errors').hide();
                             } catch (e) {
                                 $('#errors'), text('Time conflict with another event');

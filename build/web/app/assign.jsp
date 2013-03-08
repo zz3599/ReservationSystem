@@ -20,11 +20,30 @@
         <title>Assign Users</title>
     </head>
     <body>
+        <div class="horizontal">
+            <ul id="mainmenu"class="menu">
+                <li><a href="home.jsp">Home</a></li>
+                <li><a href="logout">Logout</a></li>
+                    <c:choose>
+                        <c:when test="${user.usertype == 0}">
+                        <li><a id="manageusers" href="users">Manage Users</a></li>
+                        <li><a id="viewevents" href="events">View/Create Events</a></li>
+                        <li><a id="assignuser" href="assign">Assign User To Event</a></li>
+                        </c:when>
+                        <c:when test="${user.usertype == 1}">
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:when>
+                        <c:otherwise>
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:otherwise>
+                    </c:choose>
+            </ul>
+        </div>
         <c:if test="${user.usertype == 0}">
             <div>
-                <p>Select an event:</p>
-                <h1>Event Listing</h1>
-                <div id="listevents">
+                <h2>Click to select</h2>
+                <h3>Event Listing</h3>
+                <div class="list" id="listevents">
                     <c:forEach items="${events}" var="e">
                         <div class="" id="${e.id}">
                             Event: ${e.title} <br>
@@ -41,8 +60,10 @@
                     Search for users by name/username: <input id="query" type="text" /><br>
                     <div id="matchingusers"></div>
                 </div>
+                <div id="selecteddiv">
                 Selected Event: <div id="selectedevent"></div>
                 Selected User:<div id="selecteduser"></div>
+                </div>
                 <button id="confirmreserve" type="button">Confirm Assignment</button>
                 <div id="errors"></div>
             </div>
@@ -86,7 +107,7 @@
                         } else {
                             //failed, do something
                             $('#errors').text(user + ' is already assigned to event');
-                            
+
                         }
                     },
                     error: function(x, t, e) {

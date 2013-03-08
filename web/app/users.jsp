@@ -20,10 +20,45 @@
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>
+        <div class="horizontal">
+            <ul id="mainmenu"class="menu">
+                <li><a href="home.jsp">Home</a></li>
+                <li><a href="logout">Logout</a></li>
+                    <c:choose>
+                        <c:when test="${user.usertype == 0}">
+                        <li><a id="manageusers" href="users">Manage Users</a></li>
+                        <li><a id="viewevents" href="events">View/Create Events</a></li>
+                        <li><a id="assignuser" href="assign">Assign User To Event</a></li>
+                        </c:when>
+                        <c:when test="${user.usertype == 1}">
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:when>
+                        <c:otherwise>
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:otherwise>
+                    </c:choose>
+            </ul>
+        </div>
         <h1>Manage Users</h1>
-        <div id="usersdiv">
+        <h2>Click any user to delete</h2>
+        <div class="list" id="usersdiv">
             <c:forEach items="${users}" var="user">
-                <div class="" id="${user.id}">${user.fullname}, handle: ${user.username}</div>            
+                <div class="" id="${user.id}">
+                    ${user.fullname}, username: ${user.username}, 
+                    role: 
+                    <c:choose>
+                        <c:when test="${user.usertype == 0}">
+                            administrator
+                        </c:when>
+                        <c:when test="${user.usertype == 1}">
+                            viewer
+                        </c:when>
+                        <c:otherwise>
+                            user
+                        </c:otherwise>
+                    </c:choose>
+
+                </div>            
             </c:forEach>
         </div>
         <div id="adduser">
@@ -45,7 +80,7 @@
             $('#submit').click(function(e) {
                 e.preventDefault();
                 var parent = $('#usersdiv');
-                var template = "<div id={{id}}> {{fullname}}, handle: {{username}}</div>";
+                var template = "<div id={{id}}> {{fullname}}, username: {{username}}, handle: {{username}}</div>";
                 $.ajax({
                     type: "POST",
                     url: "users",
@@ -64,19 +99,19 @@
                     }
                 });
             });
-            $('#usersdiv').delegate("div", "click", function(e){
+            $('#usersdiv').delegate("div", "click", function(e) {
                 var id = this.id;
                 $.ajax({
-                     type: 'POST', 
-                     url: 'users', 
-                     data: {action: 'removeuser', id: id},
-                     success: function(data){
-                         if(data ==='success'){
-                             $('#' + id).remove();
-                         }
-                     }
-               });
-                
+                    type: 'POST',
+                    url: 'users',
+                    data: {action: 'removeuser', id: id},
+                    success: function(data) {
+                        if (data === 'success') {
+                            $('#' + id).remove();
+                        }
+                    }
+                });
+
             });
         });
 

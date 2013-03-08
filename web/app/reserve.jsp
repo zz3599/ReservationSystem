@@ -20,8 +20,27 @@
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>
+        <div class="horizontal">
+            <ul id="mainmenu"class="menu">
+                <li><a href="home.jsp">Home</a></li>
+                <li><a href="logout">Logout</a></li>
+                    <c:choose>
+                        <c:when test="${user.usertype == 0}">
+                        <li><a id="manageusers" href="users">Manage Users</a></li>
+                        <li><a id="viewevents" href="events">View/Create Events</a></li>
+                        <li><a id="assignuser" href="assign">Assign User To Event</a></li>
+                        </c:when>
+                        <c:when test="${user.usertype == 1}">
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:when>
+                        <c:otherwise>
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:otherwise>
+                    </c:choose>
+            </ul>
+        </div>
         <h1>Reservations</h1>
-        
+
         <c:if test="${user.usertype == 2}">
             <div id="yourslot">
                 <div id="yourslotid" style="display:none;"><c:out value="${yourslot.id}"/></div>
@@ -30,17 +49,18 @@
                     <c:out value="${yourslot.start}"/> to <c:out value="${yourslot.end}"/>
                 </c:if>
             </div>
-            
+
         </c:if>
         <div id="eventdetails">
-            <p>Event Details</p>
+            <h4>Event Details</h4>
             Event: <c:out value="${event.title}"/><br>
             Date: <c:out value="${event.date}"/><br>
             Location: <c:out value="${event.location}"/><br>
             Supervisor/TA: <c:out value="${event.supervisor}"/><br>
+            Slot duration: <c:out value="${event.duration}"/><br>
         </div>
         <br>
-        <div id="reservedtimes">
+        <div class="list" id="reservedtimes">
             <c:forEach items="${slots}" var="slot">
                 <div class="" id="${slot.id}"> 
                     start: ${slot.start}, end: ${slot.end}
@@ -88,22 +108,22 @@
                     success: function(data) {
                         if (data === 'fail') {
                             messages.text('Database error');
-                            
-                        } else if(data === 'denied'){
+
+                        } else if (data === 'denied') {
                             messages.text('You do not have permission to make a reservation');
                         } else {//success
                             messages.text('You successfully made a reservation');
                             var obj = JSON.parse(data);
                             yourslot.text(Mustache.render(template, obj));
                             var oldreservedslot = yourslotid.text();
-                            
-                            var oldslot = $('#' + oldreservedslot);                            
+
+                            var oldslot = $('#' + oldreservedslot);
                             var newtext = $('#' + oldreservedslot).text().replace('reserved', 'open');
                             oldslot.text(newtext);
-                            
+
                             //update the slotnum in hidden field
                             yourslotid.text(slotnum);
-                            
+
                             var newreservedslot = $('#' + slotnum);
                             var newR = newreservedslot.text().replace('open', 'reserved');
                             newreservedslot.text(newR);

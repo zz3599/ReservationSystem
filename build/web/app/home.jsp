@@ -19,32 +19,35 @@
         <link rel="stylesheet" type="text/css" href="../css/main.css">
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
-    <body>        
-        <ul id="mainmenu"class="menu">
-            <li><a href="home.jsp">Home</a></li>
-            <c:choose>
-                <c:when test="${user.usertype == 0}">
-                    <li><a id="manageusers" href="users">Manage Users</a></li>
-                    <li><a id="viewevents" href="events">View/Create Events</a></li>
-                    <li><a id="assignuser" href="assign">Assign User To Event</a></li>
-                </c:when>
-                <c:when test="${user.usertype == 1}">
-                    <li><a id="viewevents" href="events">View Events</a></li>
-                </c:when>
-                <c:otherwise>
-                    <li><a id="viewevents" href="events">View Events</a></li>
-                </c:otherwise>
-            </c:choose>
-        </ul>
+    <body>      
+        <div class="horizontal">
+            <ul id="mainmenu"class="menu">
+                <li><a href="home.jsp">Home</a></li>
+                <li><a href="logout">Logout</a></li>
+                    <c:choose>
+                        <c:when test="${user.usertype == 0}">
+                        <li><a id="manageusers" href="users">Manage Users</a></li>
+                        <li><a id="viewevents" href="events">View/Create Events</a></li>
+                        <li><a id="assignuser" href="assign">Assign User To Event</a></li>
+                        </c:when>
+                        <c:when test="${user.usertype == 1}">
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:when>
+                        <c:otherwise>
+                        <li><a id="viewevents" href="events">View Events</a></li>
+                        </c:otherwise>
+                    </c:choose>
+            </ul>
+        </div>
         <h2>Hello ${user.fullname}!</h2>
         <div id="content"></div>
         <script>
-            $(document).ready(function(){
-               $('#mainmenu').delegate("a", "click", function(e){
-                   var id = $(this).attr('id');
-               }) ;
+            $(document).ready(function() {
+                $('#mainmenu').delegate("a", "click", function(e) {
+                    var id = $(this).attr('id');
+                });
             });
-            
+
         </script>
     </body>
 </html>

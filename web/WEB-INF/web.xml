@@ -2,23 +2,27 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
     <servlet>
         <servlet-name>LoginServlet</servlet-name>
-        <servlet-class>LoginServlet</servlet-class>
+        <servlet-class>servlets.LoginServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>UserServlet</servlet-name>
-        <servlet-class>UserServlet</servlet-class>
+        <servlet-class>servlets.UserServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>EventServlet</servlet-name>
-        <servlet-class>EventServlet</servlet-class>
+        <servlet-class>servlets.EventServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ReserveServlet</servlet-name>
-        <servlet-class>ReserveServlet</servlet-class>
+        <servlet-class>servlets.ReserveServlet</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>AssignServlet</servlet-name>
-        <servlet-class>AssignServlet</servlet-class>
+        <servlet-class>servlets.AssignServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>servlets.LogoutServlet</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
@@ -39,6 +43,10 @@
     <servlet-mapping>
         <servlet-name>AssignServlet</servlet-name>
         <url-pattern>/app/assign</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/app/logout</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

@@ -2,25 +2,20 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+package servlets;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.http.HttpSession;
 
 /**
  *
  * @author brook
  */
-public class LoginServlet extends HttpServlet {
+public class LogoutServlet extends HttpServlet {
 
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -36,7 +31,8 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+        request.getSession().invalidate();
+        response.sendRedirect("../index.jsp");
     }
 
     /**
@@ -51,23 +47,7 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String username = request.getParameter("username").trim();
-        String password = request.getParameter("password").trim();
-        if (Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(password)) {
-            request.setAttribute("errorMessage", "Invalid username/password");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
-            return;
-        }
-        UserDAO.User user = UserDAO.existsUser(username, password);
-        if (user != null && user.isValid()) {
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
-            session.setAttribute("usertype", user.usertype);
-            response.sendRedirect("app/home.jsp");
-        } else {
-            request.setAttribute("errorMessage", "Invalid username/password");
-            request.getRequestDispatcher("index.jsp").forward(request, response);
-        }        
+        
     }
 
     /**
