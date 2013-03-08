@@ -64,6 +64,20 @@
                     }
                 });
             });
+            $('#usersdiv').delegate("div", "click", function(e){
+                var id = this.id;
+                $.ajax({
+                     type: 'POST', 
+                     url: 'users', 
+                     data: {action: 'removeuser', id: id},
+                     success: function(data){
+                         if(data ==='success'){
+                             $('#' + id).remove();
+                         }
+                     }
+               });
+                
+            });
         });
 
     </script>

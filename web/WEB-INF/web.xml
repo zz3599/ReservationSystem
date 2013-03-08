@@ -16,6 +16,10 @@
         <servlet-name>ReserveServlet</servlet-name>
         <servlet-class>ReserveServlet</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>AssignServlet</servlet-name>
+        <servlet-class>AssignServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>LoginServlet</servlet-name>
         <url-pattern>/LoginServlet</url-pattern>
@@ -31,6 +35,10 @@
     <servlet-mapping>
         <servlet-name>ReserveServlet</servlet-name>
         <url-pattern>/app/reserve</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>AssignServlet</servlet-name>
+        <url-pattern>/app/assign</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

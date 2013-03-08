@@ -17,9 +17,9 @@ public class UserDAO {
     
     private static final String CHECKUSER = "Select * from Users where username=? and password=?";
     private static final String CREATEUSER = "Insert into Users (username, password, fullname, usertype) values (?, ?, ?, ?)";
-    private static final String FINDUSER = "Select * from Users where username like ? or fullname like ?";
+    private static final String FINDUSER = "Select * from Users where (username like ? or fullname like ?) and usertype=2";
     private static final String GETALLUSERS = "Select * from Users";
-    private static final String DELETEUSER = "Delete from Users where id=?"; //TODO: implement
+    private static final String DELETEUSER = "Delete from Users where id=?";
     
     public static User existsUser(String username, String password){
         if(Utils.isNullOrEmpty(username) || Utils.isNullOrEmpty(password)){

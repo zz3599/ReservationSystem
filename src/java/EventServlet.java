@@ -32,22 +32,7 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String action = request.getParameter("action");
-        if (Utils.isNullOrEmpty(action)) {
-            int usertype = (Integer) request.getSession().getAttribute("usertype");
-            List<EventDAO.Event> events = EventDAO.selectAllEvents();
-            request.setAttribute("events", events);
-            request.getRequestDispatcher("/app/events.jsp").forward(request, response);
-        } else {
-            if(action.equals("allevents")){
-                PrintWriter out = response.getWriter();
-                String json = Utils.toJSON(EventDAO.selectAllEvents());
-                out.write(json);
-                out.flush();
-                out.close();
-            }
-        }
-
+        getAllEvents(request, response);
     }
 
     /**
@@ -72,13 +57,15 @@ public class EventServlet extends HttpServlet {
             if (user == null || !user.isValid() || !user.isAdmin()) {
                 return;
             }
-            int adminid = user.getId();
-            String location = request.getParameter("location").trim();
-            String supervisor = request.getParameter("supervisor").trim();
             Timestamp startTime = Timestamp.valueOf(request.getParameter("startTime"));
             Timestamp endTime = Timestamp.valueOf(request.getParameter("endTime"));
-            int duration = (int) TimeUnit.MILLISECONDS.toMinutes(endTime.getTime() - startTime.getTime());
-            EventDAO.Event event = EventDAO.createEvent(adminid, startTime, endTime, duration, location, supervisor);
+            int duration = Integer.parseInt(request.getParameter("duration"));
+            int totalTime = (int) TimeUnit.MILLISECONDS.toMinutes(endTime.getTime() - startTime.getTime());
+            int numslots = totalTime/duration;
+            String location = request.getParameter("location").trim();
+            String supervisor = request.getParameter("supervisor").trim();
+            String title = request.getParameter("title").trim();
+            EventDAO.Event event = EventDAO.createEvent(startTime, endTime, duration, numslots, location, supervisor, title);
             if (event != null) {
                 out.write(Utils.toJSON(event));
             }
@@ -103,6 +90,26 @@ public class EventServlet extends HttpServlet {
         }
         out.flush();
         out.close();
+    }
+
+    public void getAllEvents(HttpServletRequest request, HttpServletResponse response) {
+        UserDAO.User user = (UserDAO.User)request.getSession().getAttribute("user");
+        int usertype = (Integer) request.getSession().getAttribute("usertype");
+        List<EventDAO.Event> events = null;
+        if(usertype == UserDAO.USER){
+            events = EventDAO.selectUserEvents(user.id);
+        } else {
+            events = EventDAO.selectAllEvents();
+        }
+        request.setAttribute("events", events);
+        try {
+            request.getRequestDispatcher("/app/events.jsp").forward(request, response);
+        } catch (Exception e) {
+        }
+    }
+    
+    public void getUserEvents(HttpServletRequest request, HttpServletResponse response) {
+        
     }
 
     /**

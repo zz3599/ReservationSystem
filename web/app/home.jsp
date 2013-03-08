@@ -26,14 +26,13 @@
                 <c:when test="${user.usertype == 0}">
                     <li><a id="manageusers" href="users">Manage Users</a></li>
                     <li><a id="viewevents" href="events">View/Create Events</a></li>
-                    <li><a id="assignuser" href="reserve">Assign User To Event</a></li>
+                    <li><a id="assignuser" href="assign">Assign User To Event</a></li>
                 </c:when>
                 <c:when test="${user.usertype == 1}">
                     <li><a id="viewevents" href="events">View Events</a></li>
                 </c:when>
                 <c:otherwise>
                     <li><a id="viewevents" href="events">View Events</a></li>
-                    <li><a id="makereserve" href="reserve">Make Reservation</a></li>
                 </c:otherwise>
             </c:choose>
         </ul>

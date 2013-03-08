@@ -12,24 +12,28 @@ import java.util.List;
 
 public class ReservationDAO {
 
-    private static final String CREATERESERVATION = "Insert into Reservations(userid, adminid, eventid, timereserved)"
-            + " values(?, ?, ?, ?)";
-    private static final String REMOVERESERVATION = "Delete from Reservations where userid=?";
+    private static final String CREATERESERVATION = "Insert into Reservations(userid, eventid, timereserved, startTime, slotnum)"
+            + " values(?, ?, ?, ?, ?)";
+    private static final String REMOVERESERVATION = "Delete from Reservations where userid=? and eventid=?";
     private static final String GETALL = "Select * from Reservations R, Users U where R.userid = U.id";
-    private static final String GETUSERRESERVATION = "Select * from Reservations where userid=?";
+    private static final String GETALLEVENTRESERVATIONS = "Select * from Reservations R, Users U where R.userid = U.id and R.eventid=?";
+    private static final String GETUSERRESERVATION = "Select * from Reservations where userid=? and eventid=?";
+    private static final String GETALLUSERRESERVATION = "Select * from Reservations, Events E "
+            + "where userid=? and R.eventid=E.id";
 
-    public static Reservation createReservation(int userid, Integer adminid, int eventid, Timestamp timereserved) {
+    public static Reservation createReservation(int userid, int eventid, Timestamp timereserved, Timestamp startTime, int slotnum) {
         try {
             Connection con = DB.getConnection();
             PreparedStatement ps = con.prepareStatement(CREATERESERVATION, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, userid);
-            ps.setInt(2, adminid);
-            ps.setInt(3, eventid);
-            ps.setTimestamp(4, timereserved);
+            ps.setInt(2, eventid);
+            ps.setTimestamp(3, timereserved);
+            ps.setTimestamp(4, startTime);
+            ps.setInt(5, slotnum);
             int result = ps.executeUpdate();
             ResultSet res = ps.getGeneratedKeys();
             if (res.next()) {
-                return new Reservation(res.getInt(1), userid, adminid, eventid, timereserved);
+                return new Reservation(res.getInt(1), userid, eventid, timereserved, startTime, slotnum);
             }
 
         } catch (Exception ex) {
@@ -37,11 +41,12 @@ public class ReservationDAO {
         return null;
     }
 
-    public static boolean removeReservation(int userid) {
+    public static boolean removeReservation(int userid, int eventid) {
         try {
             Connection con = DB.getConnection();
             PreparedStatement ps = con.prepareStatement(REMOVERESERVATION);
             ps.setInt(1, userid);
+            ps.setInt(2, eventid);
             int result = ps.executeUpdate();
             if (result > 0) {
                 return true;
@@ -69,11 +74,51 @@ public class ReservationDAO {
         }
         return null;
     }
+    
+    public static List<Reservation> getAllEventReservations(int eventid) {
+        try {
+            Connection con = DB.getConnection();
+            PreparedStatement ps = con.prepareStatement(GETALLEVENTRESERVATIONS);
+            ps.setInt(1, eventid);
+            ResultSet result = ps.executeQuery();
+            List<Reservation> reserves = new ArrayList<Reservation>();
+            while (result.next()) {
+                Reservation res = extractReservation(result);
+                res.user = extractUser(result);
+                reserves.add(res);
+            }
+            return reserves;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    public static List<Reservation> getAllUserEventReservations(int userid) {
+        try {
+            Connection con = DB.getConnection();
+            PreparedStatement ps = con.prepareStatement(GETALLUSERRESERVATION);
+            ps.setInt(1, userid);
+            ResultSet result = ps.executeQuery();
+            List<Reservation> reserves = new ArrayList<Reservation>();
+            while (result.next()) {
+                Reservation res = extractReservation(result);
+                res.user = extractUser(result);
+                reserves.add(res);
+            }
+            return reserves;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-    public static Reservation getReservation() {
+    public static Reservation getUserReservation(int userid, int eventid) {
         try {
             Connection con = DB.getConnection();
             PreparedStatement ps = con.prepareStatement(GETUSERRESERVATION);
+            ps.setInt(1, userid);
+            ps.setInt(2, eventid);
             ResultSet result = ps.executeQuery();
             if (result.first()) {
                 Reservation res = extractReservation(result);
@@ -86,11 +131,12 @@ public class ReservationDAO {
 
     public static Reservation extractReservation(ResultSet result) throws Exception{
         int id = result.getInt("id");
-        int userid = result.getInt("userid");
-        int adminid = result.getInt("adminid");
+        int userid = result.getInt("userid");        
         int eventid = result.getInt("eventid");
         Timestamp timereserved = result.getTimestamp("timereserved");
-        Reservation res = new Reservation(id, userid, adminid, eventid, timereserved);
+        Timestamp startTime = result.getTimestamp("startTime");
+        int slotnum = result.getInt("slotnum");
+        Reservation res = new Reservation(id, userid, eventid, timereserved, startTime, slotnum);
         return res;
     }
 
@@ -107,9 +153,10 @@ public class ReservationDAO {
 
         public int id;
         public int userid;
-        public int adminid;
         public int eventid;
         public Timestamp timereserved;
+        public Timestamp startTime;
+        public int slotnum;
         public UserDAO.User user;
         
         public int getId() {
@@ -120,9 +167,6 @@ public class ReservationDAO {
             return userid;
         }
 
-        public int getAdminid() {
-            return adminid;
-        }
 
         public int getEventid() {
             return eventid;
@@ -135,24 +179,26 @@ public class ReservationDAO {
         public UserDAO.User getUser() {
             return user;
         }
-        public Reservation(int id, int userid, int adminid, int eventid, Timestamp timereserved, UserDAO.User user){
-            this(id, userid, adminid, eventid, timereserved);
+
+        public Timestamp getStartTime() {
+            return startTime;
+        }
+
+        public int getSlotnum() {
+            return slotnum;
+        }
+        
+        public Reservation(int id, int userid, int eventid, Timestamp timereserved, Timestamp startTime, int slotnum, UserDAO.User user){
+            this(id, userid, eventid, timereserved, startTime, slotnum);
             this.user = user;
         }
-        public Reservation(int id, int userid, int adminid, int eventid, Timestamp timereserved) {
+        public Reservation(int id, int userid, int eventid, Timestamp timereserved, Timestamp startTime, int slotnum ) {
             this.id = id;
             this.userid = userid;
-            this.adminid = adminid;
             this.eventid = eventid;
             this.timereserved = timereserved;
-        }
-        
-        public boolean isAdminAssigned(){
-            return this.adminid != 0;
-        }
-        
-        public boolean valid(){
-            return this.userid != 0 && this.id != 0;
-        }
+            this.startTime = startTime;
+            this.slotnum = slotnum;
+        }        
     }
 }

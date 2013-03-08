@@ -16,24 +16,35 @@
         <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
         <script src="../js/jquery-ui-timepicker-addon.js"></script>
         <script src="../js/mustache.min.js"></script> 
-       <link rel="stylesheet" type="text/css" href="../css/main.css">
+        <link rel="stylesheet" type="text/css" href="../css/main.css">
         <link rel="stylesheet" type="text/css" href="../css/jquery-ui-1.9.2.custom.min.css">
     </head>
     <body>
         <h1>Event Listing</h1>
         <div id="listevents">
             <c:forEach items="${events}" var="e">
-                <div class="" id="${e.id}">${e.location}, starttime: ${e.startTime}, endtime: ${e.endTime}</div>            
-            </div>
-        </c:forEach>
+                <div class="" id="${e.id}">
+                    Event: ${e.title} <br>
+                    Location: ${e.location}  <br>
+                    TA: ${e.supervisor} <br>
+                    Starts: ${e.startTime} <br>
+                    Ends: ${e.endTime} <br>
+                    <a href="reserve?eventid=${e.id}">Reserve</a>
+                </div>  
+                <br>
+            </c:forEach>
+            
+        </div>
         <c:if test="${user.usertype == 0}">
             <div id="addevent">
                 <p>Add Event<p>
                 <form id="addeventform" name="addevent">
+                    Title(something descriptive) <input id="title" type="text" name="title"/><br>
                     Location: <input id="location" type="text" name="location"/><br>
                     Supervisor: <input type="text" id="supervisor" name="supervisor"/><br>
-                    Start: <input type="text" id="startTime" name="startTime" value="" class=""><br>
-                    End: <input type="text" id="endTime" name="endTime" value="" class=""><br>
+                    Start: <input type="text" id="startTime" name="startTime" value="" class=""/><br>
+                    End: <input type="text" id="endTime" name="endTime" value="" class=""/><br>
+                    Slot Duration (minutes)<input type="text" id="duration" name="duration" value=""/><br>
                     <input type="hidden" name="action" value="addevent"><br>
                     <br><input id="addeventsubmit" type="submit">
                 </form>
@@ -43,7 +54,8 @@
     </body>
     <script>
         $(document).ready(function() {
-            if($('#addevent').length === 0) return;
+            if ($('#addevent').length === 0)
+                return;
             var startDateTextBox = $('#startTime');
             var endDateTextBox = $('#endTime');
 
@@ -85,16 +97,16 @@
             });
             $('#addeventsubmit').click(function(e) {
                 e.preventDefault();
-                var location, supervisor, stime, etime;
+                var location, supervisor, stime, etime, title, duration;
                 var parent = $('#listevents');
-                var template = "<div id={{id}}> {{location}}, startime: {{startTime}}, endtime: {{endTime}}</div>";
+                var template = '<br><div id={{id}}> Event: {{title}} <br> Location: {{location}}  <br>' + 
+                    'TA: {{supervisor}}<br>Starts: {{startTime} <br>Ends: {{endTime}}</div>';
                 if (!(location = $('#location').val()) || !(supervisor = $('#supervisor').val()) ||
-                        !(stime = $('#startTime').val()) || !(etime = $('#endTime').val())) {
+                        !(stime = $('#startTime').val()) || !(etime = $('#endTime').val()) ||
+                        !(title = $('#title').val()) || !(duration = $('#duration').val())) {
                     $('#errors').text('Please fill all fields');
                 } else {
                     $('#errors').hide();
-                    //var datastring = 'action=addevent&location=' + location + '&supervisor=' + supervisor + '&startTime=' +
-                    //       stime + '&endTime=' + etime;
                     var datastring = $('#addeventform').serialize();
                     $.ajax({
                         type: 'POST',
@@ -102,7 +114,9 @@
                         data: $('#addeventform').serialize(),
                         success: function(data) {
                             try {
-                                $(Mustache.render(template, JSON.parse(data))).appendTo(parent);
+                                var datao = JSON.parse(data);
+                                var newevent = $(Mustache.render(template, datao)).appendTo(parent);
+                                var newlink = $("<a>", {href: 'reserve?id=' + datao.id}).appendTo(newevent);
                                 $('#errors').hide();
                             } catch (e) {
                                 $('#errors'), text('Time conflict with another event');
