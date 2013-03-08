@@ -24,9 +24,10 @@
         
         <c:if test="${user.usertype == 2}">
             <div id="yourslot">
+                <div id="yourslotid" style="display:none;"><c:out value="${yourslot.id}"/></div>
                 <c:if test="${yourslot != null}">
                     Your reservation time: 
-                    <c:out value="${yourslot}"/>
+                    <c:out value="${yourslot.start}"/> to <c:out value="${yourslot.end}"/>
                 </c:if>
             </div>
             
@@ -71,6 +72,8 @@
         $(document).ready(function() {
             var messages = $('#messages');
             var yourslot = $('#yourslot');
+            var yourslotid = $('#yourslotid');
+            var template = 'Your reservation time: {{stime}}';
             $('#reservedtimes').delegate('div', 'click', function() {
                 var slotnum = this.id;
                 var textcontent = $(this).text();
@@ -83,24 +86,32 @@
                     url: 'reserve?action=reserve',
                     data: {'slotnum': slotnum},
                     success: function(data) {
-                        if (data === 'success') {
-                            messages.text('You successfully made a reservation');
-                            //yourslot.text()
-                            //change color/text of the slotnum
+                        if (data === 'fail') {
+                            messages.text('Database error');
+                            
                         } else if(data === 'denied'){
                             messages.text('You do not have permission to make a reservation');
-                        } else {
-                            messages.text('Database error');
+                        } else {//success
+                            messages.text('You successfully made a reservation');
+                            var obj = JSON.parse(data);
+                            yourslot.text(Mustache.render(template, obj));
+                            var oldreservedslot = yourslotid.text();
+                            
+                            var oldslot = $('#' + oldreservedslot);                            
+                            var newtext = $('#' + oldreservedslot).text().replace('reserved', 'open');
+                            oldslot.text(newtext);
+                            
+                            //update the slotnum in hidden field
+                            yourslotid.text(slotnum);
+                            
+                            var newreservedslot = $('#' + slotnum);
+                            var newR = newreservedslot.text().replace('open', 'reserved');
+                            newreservedslot.text(newR);
+                            //change color/text of the slotnum
                         }
                     }
                 });
             });
-            var etemp = "<div id={{id}}> {{location}}, startime: {{startTime}}, endtime: {{endTime}}</div>";
-            var reservedslots = [];
-            if ($('#searchusers').length === 0) {
-                //user and viewer cannot do anything below here
-                return;
-            }
         });
 
     </script>

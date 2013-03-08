@@ -81,9 +81,10 @@ public class ReserveServlet extends HttpServlet {
                 //long userstarttime = eventStart + yourslot.slotnum* duration;
                 //String r = formatter.format(new Timestamp(userstarttime));
                 if (yourslot != null) {
-                    Timestamp starttime = yourslot.startTime;
-                    String r = formatter.format(starttime);
-                    session.setAttribute("yourslot", r);//the user reserved time representation
+                    SlotData data = slots.get(yourslot.slotnum);
+                    //Timestamp starttime = yourslot.startTime;
+                    //String r = formatter.format(starttime);
+                    session.setAttribute("yourslot", data);//the user reserved time representation
                 }
             }
             session.setAttribute("event", event);
@@ -133,8 +134,12 @@ public class ReserveServlet extends HttpServlet {
                 Timestamp s_time = new Timestamp(starttime);
 
                 ReservationDAO.Reservation res = ReservationDAO.createReservation(userid, eventid, timereserved, s_time, slotnum);
+                //format the time for easy display
+                SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
+                res.stime = formatter.format(s_time);
                 if (res != null) {
-                    out.write("success");
+                    //out.write("success");
+                    out.write(Utils.toJSON(res));
                 } else {
                     out.write("fail");
                 }
@@ -143,6 +148,7 @@ public class ReserveServlet extends HttpServlet {
         out.flush();
         out.close();
     }
+    
 
     public static class SlotData {
 

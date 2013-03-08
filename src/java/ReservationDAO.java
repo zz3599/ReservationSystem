@@ -13,7 +13,7 @@ import java.util.List;
 public class ReservationDAO {    
     private static final String CREATERESERVATION = "Insert into Reservations(userid, eventid, timereserved, startTime, slotnum)"
             + " values(?, ?, ?, ?, ?)";
-    private static final String UPDATERESERVATION = "Update Reservations set slotnum=? where userid=? and userid=?";
+    private static final String UPDATERESERVATION = "Update Reservations set slotnum=?, starttime=? where userid=? and eventid=?";
     private static final String REMOVERESERVATION = "Delete from Reservations where userid=? and eventid=?";
     private static final String GETALL = "Select * from Reservations R, Users U where R.userid = U.id";
     private static final String GETALLEVENTRESERVATIONS = "Select * from Reservations R, Users U where R.userid = U.id and R.eventid=?";
@@ -27,12 +27,12 @@ public class ReservationDAO {
                 Connection con = DB.getConnection();
                 PreparedStatement ps = con.prepareStatement(UPDATERESERVATION, Statement.RETURN_GENERATED_KEYS);
                 ps.setInt(1, slotnum);
-                ps.setInt(2, userid);
-                ps.setInt(3, eventid);
+                ps.setTimestamp(2, startTime);
+                ps.setInt(3, userid);
+                ps.setInt(4, eventid);
                 int result = ps.executeUpdate();
-                ResultSet res = ps.getGeneratedKeys();
-                if(res.next()){
-                    return new Reservation(res.getInt(1), userid, eventid, timereserved, startTime, slotnum);
+                if(result > 0){
+                    return new Reservation(1, userid, eventid, timereserved, startTime, slotnum); //id can be bogus, not used
                 }
             } else {
                 Connection con = DB.getConnection();
@@ -169,8 +169,13 @@ public class ReservationDAO {
         public int eventid;
         public Timestamp timereserved;
         public Timestamp startTime;
+        public String stime;//easy string representation
         public int slotnum;
         public UserDAO.User user;
+
+        public String getStime() {
+            return stime;
+        }
         
         public int getId() {
             return id;
