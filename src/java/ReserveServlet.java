@@ -38,42 +38,57 @@ public class ReserveServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String eventid = request.getParameter("eventid");
+        HttpSession session = request.getSession();
         if (!Utils.isNullOrEmpty(eventid)) {
             int id = Integer.parseInt(eventid);
             EventDAO.Event event = EventDAO.selectEvent(id);
             List<ReservationDAO.Reservation> reservations = ReservationDAO.getAllEventReservations(id);
             Map<Integer, ReservationDAO.Reservation> reservedslots = new HashMap<Integer, ReservationDAO.Reservation>();
-            
-            for(ReservationDAO.Reservation r : reservations){
+
+            for (ReservationDAO.Reservation r : reservations) {
                 reservedslots.put(r.slotnum, r);
             }
-            
+
             long eventStart = event.startTime.getTime();
             long duration = TimeUnit.MINUTES.toMillis(event.duration);
             SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
             //to be used to display time of event
             String startDate = new SimpleDateFormat("EEE, MMM d, yyyy").format(event.startTime);
             event.setDate(startDate);
-            
+
             List<SlotData> slots = new ArrayList<SlotData>();
-            for(int i = 0; i < event.numslots; i++){                
-                long starttime = eventStart + i*duration;
+            for (int i = 0; i < event.numslots; i++) {
+                long starttime = eventStart + i * duration;
                 long endtime = starttime + duration;
-                
+
                 Timestamp slotstart = new Timestamp(starttime);
                 Timestamp slotend = new Timestamp(endtime);
                 String formatstart = formatter.format(slotstart);
                 String formatend = formatter.format(slotend);
                 SlotData data = new SlotData(i, formatstart, formatend);
                 ReservationDAO.Reservation reserve = reservedslots.get(i);
-                if(reserve != null){
+                if (reserve != null) {
                     UserDAO.User user = reserve.user;
                     data.user = user;
                 }
                 slots.add(data);
-            }           
-            request.getSession().setAttribute("event", event);
-            request.getSession().setAttribute("slots", slots);
+            }
+            UserDAO.User user = (UserDAO.User) session.getAttribute("user");
+            int userid = user.id;
+            int usertype = user.usertype;
+            if (usertype == UserDAO.USER) {
+                ReservationDAO.Reservation yourslot = ReservationDAO.getUserReservation(userid, id);
+                //long userstarttime = eventStart + yourslot.slotnum* duration;
+                //String r = formatter.format(new Timestamp(userstarttime));
+                if (yourslot != null) {
+                    Timestamp starttime = yourslot.startTime;
+                    String r = formatter.format(starttime);
+                    session.setAttribute("yourslot", r);//the user reserved time representation
+                }
+            }
+            session.setAttribute("event", event);
+            session.setAttribute("slots", slots);
+
             request.getRequestDispatcher("/app/reserve.jsp").forward(request, response);
         }
     }
@@ -99,28 +114,40 @@ public class ReserveServlet extends HttpServlet {
             List<ReservationDAO.Reservation> reservations = ReservationDAO.getAllReservations();
             String json = Utils.toJSON(reservations);
             out.write(json);
-        } else if (action.equals("makereservation")) {
-            //user made it himself, so no adminid 
+        } else if (action.equals("reserve")) {
+            //somebody clicked to make a reservation - only process if user            
             HttpSession session = request.getSession();
             UserDAO.User currentuser = (UserDAO.User) session.getAttribute("user");
-            int userid = currentuser.id;
-            int eventid = Integer.parseInt(request.getParameter("eventid"));
-            java.util.Date date = new java.util.Date();
-            Timestamp timereserved = new Timestamp(date.getTime());
-            ReservationDAO.Reservation res = null;//ReservationDAO.createReservation(userid, null, eventid, timereserved);
-            if (res != null) {
-                out.write("success");
+            if (currentuser.usertype != UserDAO.USER) {
+                out.write("denied");
             } else {
-                out.write("fail");
+                int userid = currentuser.id;
+                int eventid = ((EventDAO.Event) session.getAttribute("event")).id;
+                java.util.Date date = new java.util.Date();
+                Timestamp timereserved = new Timestamp(date.getTime());
+                int slotnum = Integer.parseInt(request.getParameter("slotnum"));
+                //calculate the time of the slot
+                EventDAO.Event event = (EventDAO.Event) session.getAttribute("event");
+                Timestamp eventstart = event.startTime;
+                long starttime = eventstart.getTime() + TimeUnit.MINUTES.toMillis(event.duration * slotnum);
+                Timestamp s_time = new Timestamp(starttime);
+
+                ReservationDAO.Reservation res = ReservationDAO.createReservation(userid, eventid, timereserved, s_time, slotnum);
+                if (res != null) {
+                    out.write("success");
+                } else {
+                    out.write("fail");
+                }
             }
         }
         out.flush();
         out.close();
     }
 
-    public static class SlotData{
+    public static class SlotData {
+
         public int id;
-        public String start; 
+        public String start;
         public String end;
         public UserDAO.User user;
 
@@ -139,13 +166,14 @@ public class ReserveServlet extends HttpServlet {
         public UserDAO.User getUser() {
             return user;
         }
-        public SlotData (int id, String start, String end){
+
+        public SlotData(int id, String start, String end) {
             this.id = id;
             this.start = start;
             this.end = end;
         }
-        
     }
+
     private void makeReservation(int userid, int adminid, int eventid, Timestamp time, PrintWriter out) {
     }
 

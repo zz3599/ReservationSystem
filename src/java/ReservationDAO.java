@@ -10,10 +10,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReservationDAO {
-
+public class ReservationDAO {    
     private static final String CREATERESERVATION = "Insert into Reservations(userid, eventid, timereserved, startTime, slotnum)"
             + " values(?, ?, ?, ?, ?)";
+    private static final String UPDATERESERVATION = "Update Reservations set slotnum=? where userid=? and userid=?";
     private static final String REMOVERESERVATION = "Delete from Reservations where userid=? and eventid=?";
     private static final String GETALL = "Select * from Reservations R, Users U where R.userid = U.id";
     private static final String GETALLEVENTRESERVATIONS = "Select * from Reservations R, Users U where R.userid = U.id and R.eventid=?";
@@ -23,17 +23,30 @@ public class ReservationDAO {
 
     public static Reservation createReservation(int userid, int eventid, Timestamp timereserved, Timestamp startTime, int slotnum) {
         try {
-            Connection con = DB.getConnection();
-            PreparedStatement ps = con.prepareStatement(CREATERESERVATION, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, userid);
-            ps.setInt(2, eventid);
-            ps.setTimestamp(3, timereserved);
-            ps.setTimestamp(4, startTime);
-            ps.setInt(5, slotnum);
-            int result = ps.executeUpdate();
-            ResultSet res = ps.getGeneratedKeys();
-            if (res.next()) {
-                return new Reservation(res.getInt(1), userid, eventid, timereserved, startTime, slotnum);
+            if(getUserReservation(userid, eventid) != null){//just update the field
+                Connection con = DB.getConnection();
+                PreparedStatement ps = con.prepareStatement(UPDATERESERVATION, Statement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, slotnum);
+                ps.setInt(2, userid);
+                ps.setInt(3, eventid);
+                int result = ps.executeUpdate();
+                ResultSet res = ps.getGeneratedKeys();
+                if(res.next()){
+                    return new Reservation(res.getInt(1), userid, eventid, timereserved, startTime, slotnum);
+                }
+            } else {
+                Connection con = DB.getConnection();
+                PreparedStatement ps = con.prepareStatement(CREATERESERVATION, Statement.RETURN_GENERATED_KEYS);
+                ps.setInt(1, userid);
+                ps.setInt(2, eventid);
+                ps.setTimestamp(3, timereserved);
+                ps.setTimestamp(4, startTime);
+                ps.setInt(5, slotnum);
+                int result = ps.executeUpdate();
+                ResultSet res = ps.getGeneratedKeys();
+                if (res.next()) {
+                    return new Reservation(res.getInt(1), userid, eventid, timereserved, startTime, slotnum);
+                }
             }
 
         } catch (Exception ex) {

@@ -11,7 +11,7 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>Make Reservation</title>
+        <title>Make a Reservation</title>
         <script src="../js/jquery-1.9.1.min.js"></script>
         <script src="../js/jquery-ui-1.9.2.custom.min.js"></script>
         <script src="../js/jquery-ui-timepicker-addon.js"></script>
@@ -21,6 +21,16 @@
     </head>
     <body>
         <h1>Reservations</h1>
+        
+        <c:if test="${user.usertype == 2}">
+            <div id="yourslot">
+                <c:if test="${yourslot != null}">
+                    Your reservation time: 
+                    <c:out value="${yourslot}"/>
+                </c:if>
+            </div>
+            
+        </c:if>
         <div id="eventdetails">
             <p>Event Details</p>
             Event: <c:out value="${event.title}"/><br>
@@ -31,46 +41,68 @@
         <br>
         <div id="reservedtimes">
             <c:forEach items="${slots}" var="slot">
-                <div class="" id="${slot.id}"/> 
+                <div class="" id="${slot.id}"> 
                     start: ${slot.start}, end: ${slot.end}
+
                     <c:if test="${user.usertype != 2}">
-                        reserved user: 
                         <c:if test="${slot.user != null}"> 
-                            <c:out value="${slot.user.fullname}"/>
+                            reserved user: <c:out value="${slot.user.fullname}"/>
+                        </c:if>
+                        <c:if test="${slot.user == null}"> 
+                            open
+                        </c:if>
+                    </c:if>
+                    <c:if test="${user.usertype == 2}">
+                        <c:if test="${slot.user != null}"> 
+                            reserved
+                        </c:if>
+                        <c:if test="${slot.user == null}"> 
+                            open
                         </c:if>
                     </c:if>
                 </div>
             </c:forEach>
         </div>
-</body>
+        <div id="messages">            
+        </div>
+    </body>
 
-<script>
-    $(document).ready(function() {        
-        var etemp = "<div id={{id}}> {{location}}, startime: {{startTime}}, endtime: {{endTime}}</div>";
-        var reservedslots = [];
-//        $.ajax({
-//            type: 'POST',
-//            url: 'reserve',
-//            data: {action: 'getall'},
-//            success: function(data) {
-//                try {
-//                    $.each(JSON.parse(data), function(i, d) {
-//                        var slotnum = d.slotnum;
-//                        reservedslots.push(slotnum);
-//                        //$(Mustache.render(etemp, d)).appendTo(events);
-//                    });
-//                    //render time slots
-//                } catch (e) {
-//                    //no events 
-//                }
-//            }
-//        });
-        if ($('#searchusers').length === 0) {
-            //user and viewer cannot do anything below here
-            return;
-        }
-    });
+    <script>
+        $(document).ready(function() {
+            var messages = $('#messages');
+            var yourslot = $('#yourslot');
+            $('#reservedtimes').delegate('div', 'click', function() {
+                var slotnum = this.id;
+                var textcontent = $(this).text();
+                if (textcontent.indexOf('open') === -1) {
+                    messages.text('You selected a reserved time slot');
+                    return;
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: 'reserve?action=reserve',
+                    data: {'slotnum': slotnum},
+                    success: function(data) {
+                        if (data === 'success') {
+                            messages.text('You successfully made a reservation');
+                            //yourslot.text()
+                            //change color/text of the slotnum
+                        } else if(data === 'denied'){
+                            messages.text('You do not have permission to make a reservation');
+                        } else {
+                            messages.text('Database error');
+                        }
+                    }
+                });
+            });
+            var etemp = "<div id={{id}}> {{location}}, startime: {{startTime}}, endtime: {{endTime}}</div>";
+            var reservedslots = [];
+            if ($('#searchusers').length === 0) {
+                //user and viewer cannot do anything below here
+                return;
+            }
+        });
 
-</script>
+    </script>
 
 </html>
