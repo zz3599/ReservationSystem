@@ -3,11 +3,12 @@ Reservation System
 
 Reserve events
 
-
-Details
+Build
 =========
-Load data.sql into your MySQL database 
-Load the project into Netbeans
+Create database called 'IndividualProject'
+Load data.sql into said  MySQL database 
+Import the zip into Netbeans
+Suffer the pain
 
 Source
 =========
